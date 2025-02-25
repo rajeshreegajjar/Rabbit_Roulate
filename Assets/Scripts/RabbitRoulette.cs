@@ -12,20 +12,18 @@ public class RabbitRoulette : MonoBehaviour
     public float moveSpeed = 5f;
     public float rotationSpeed = 50f;
     public float circleRadius = 5f;
-    public float jumpDistance = 3f; //
-    public float movementDuration = 10f; // Duration before selecting winner
-    public float totalDuration;
+    //public float jumpDistance = 3f; //
+    //public float movementDuration = 10f; // Duration before selecting winner
+    //public float totalDuration;
+    public bool isGameActive = true, isFinalMove = false;
 
     private GameObject rabbit;
-    private float totalTimer;
-    public int finalHoleIndex = -1;
-    Vector3 targetPosition;
-    public bool isGameActive = true, isFinalMove = false;
+    public int finalHoleIndex = -1, myHoleIndex;
+    private Vector3 targetPosition;
+
     private bool isIdle = false;
     private float idleTimer;
     private float idleInterval = 2f;
-    private bool hasReachedFinalPosition = false;
-    private bool hasGamestart = false;
 
 
     private Animator animator;
@@ -71,6 +69,12 @@ public class RabbitRoulette : MonoBehaviour
             animator.SetFloat(SPEED_X_PARAM, speedX);
             animator.SetFloat(SPEED_PARAM, speed);
         }
+        for (int i = 0; i < holePositions.Length; i++)
+        {
+            holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.white);
+            holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white);
+
+        }
         SetNewRandomPosition();
     }
 
@@ -96,7 +100,7 @@ public class RabbitRoulette : MonoBehaviour
         //    }
         //}
 
-        Debug.Log("Start rabbit movement");
+        //Debug.Log("Start rabbit movement");
 
         float distanceToTarget = Vector3.Distance(rabbit.transform.position, targetPosition);
 
@@ -107,7 +111,7 @@ public class RabbitRoulette : MonoBehaviour
         float targetSpeed = distanceToTarget > distanceThresholdForRun ? 2f : distanceToTarget > stoppingDistance ? 1f : 0f;
 
         // Smoothly interpolate speed
-        speed = isFinalMove ? Mathf.Lerp(speed, targetSpeed, moveSpeed * Time.deltaTime) : 0f;
+        speed =  Mathf.Lerp(speed, targetSpeed, moveSpeed * Time.deltaTime);
 
 
         animator.SetFloat(SPEED_X_PARAM, speedX);
@@ -119,6 +123,10 @@ public class RabbitRoulette : MonoBehaviour
             if (isFinalMove)
             {
                 isFinalMove = false;
+                holePositions[finalHoleIndex].parent.GetComponentInChildren<ParticleSystem>().Play();
+                animator.SetFloat(SPEED_X_PARAM, 0);
+                animator.SetFloat(SPEED_PARAM, 0);
+                Invoke("SetWinLossEffect", 2f);
                 Invoke("ResetRabitPosition", 5f);
             }
             else if (!isIdle)
@@ -134,6 +142,29 @@ public class RabbitRoulette : MonoBehaviour
         {
             MoveTowardsTarget();
 
+        }
+    }
+
+    private void SetWinLossEffect()
+    {
+        Debug.Log("finalHoleIndex : " + finalHoleIndex);
+        Debug.Log("myHoleIndex : " + myHoleIndex);
+        Debug.Log("parent : " + holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.GetColor("_BaseColor"));
+        if (finalHoleIndex == myHoleIndex)
+        {
+            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
+            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
+        }
+        else
+        {
+            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
+            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
+            if (myHoleIndex > -1)
+            {
+                holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.red);
+                holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.red);
+            }
+          
         }
     }
 
@@ -153,10 +184,17 @@ public class RabbitRoulette : MonoBehaviour
         }
     }
 
+    [ContextMenu("Do Something")]
+    public void startFinalMove()
+    {
+        StartFinalMove(finalHoleIndex, myHoleIndex);
+    }
 
-    public void StartFinalMove(int winningNumber)
+
+    public void StartFinalMove(int winningNumber, int myBetNumber)
     {
         finalHoleIndex = winningNumber;
+        myHoleIndex = myBetNumber;
         if (finalHoleIndex >= 0 && finalHoleIndex < holePositions.Length)
         {
             isGameActive = false;
@@ -175,7 +213,8 @@ public class RabbitRoulette : MonoBehaviour
         float randomRadius = Random.Range(1.5f, circleRadius);
         randomPoint *= randomRadius;
 
-
+        if (rabbit == null)
+            return;
 
         targetPosition = new Vector3(
              randomPoint.x,
@@ -187,7 +226,7 @@ public class RabbitRoulette : MonoBehaviour
     private void MoveTowardsTarget()
     {
 
-        Debug.Log("MoveTowardsTarget " + targetPosition);
+        //Debug.Log("MoveTowardsTarget " + targetPosition);
         Vector3 directionToTarget = (targetPosition - rabbit.transform.position).normalized;
         float targetAngle = Mathf.Atan2(directionToTarget.x, directionToTarget.z) * Mathf.Rad2Deg;
 
