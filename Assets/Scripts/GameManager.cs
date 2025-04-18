@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public Animator winAnimator;
-    public Animator loseAnimator;
+    public AudioSource winAudio;
+    public AudioSource loseAudio;
     public RabbitRoulette rabbitRoulette;
     public BettingStart bettingStart;
     public NewRound newRound;
@@ -112,21 +112,21 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(2f);
         if (isWinner)
         {
-            winAnimator.gameObject.SetActive(true);
+            //    winAnimator.gameObject.SetActive(true);
             Debug.Log("Play win Animation");
-            winAnimator.SetTrigger("Win");
+        //winAnimator.SetTrigger("Win");
+            winAudio.Play();
         }
         else
         {
-            loseAnimator.gameObject.SetActive(true);
+            //loseAnimator.gameObject.SetActive(true);
             Debug.Log("Play loss Animation");
-            loseAnimator.SetTrigger("Lose");
+            //loseAnimator.SetTrigger("Lose");
+            loseAudio.Play();
         }
-        yield return new WaitForSecondsRealtime(2f);
-        winAnimator.StopPlayback();
-        loseAnimator.StopPlayback();
-        winAnimator.gameObject.SetActive(false);
-        loseAnimator.gameObject.SetActive(false);
+        yield return new WaitForSecondsRealtime(5f);
+        winAudio.Stop();
+        loseAudio.Stop();
     }
 
 }

@@ -71,8 +71,18 @@ public class RabbitRoulette : MonoBehaviour
         }
         for (int i = 0; i < holePositions.Length; i++)
         {
-            holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.white);
-            holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white);
+            //holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.white);
+            //holePositions[i].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white);
+            ParticleSystem[] particles = holePositions[i].parent.GetComponentsInChildren<ParticleSystem>();
+            for (int j = 0; j < particles.Length; j++)
+            {
+                particles[j].Stop(true);
+            }
+            AudioSource[] audio = holePositions[i].parent.GetComponentsInChildren<AudioSource>();
+            for (int k = 0; k < audio.Length; k++)
+            {
+                audio[k].Stop();
+            }
 
         }
         SetNewRandomPosition();
@@ -123,7 +133,16 @@ public class RabbitRoulette : MonoBehaviour
             if (isFinalMove)
             {
                 isFinalMove = false;
-                holePositions[finalHoleIndex].parent.GetComponentInChildren<ParticleSystem>().Play();
+                ParticleSystem[] particles = holePositions[finalHoleIndex].parent.GetComponentsInChildren<ParticleSystem>();
+                for (int i = 0; i < particles.Length; i++)
+                {
+                    particles[i].Play();
+                }
+                AudioSource[] audio = holePositions[finalHoleIndex].parent.GetComponentsInChildren<AudioSource>();
+                for (int k = 0; k < audio.Length; k++)
+                {
+                    audio[k].Play();
+                }
                 animator.SetFloat(SPEED_X_PARAM, 0);
                 animator.SetFloat(SPEED_PARAM, 0);
                 Invoke("SetWinLossEffect", 2f);
@@ -150,22 +169,22 @@ public class RabbitRoulette : MonoBehaviour
         Debug.Log("finalHoleIndex : " + finalHoleIndex);
         Debug.Log("myHoleIndex : " + myHoleIndex);
         Debug.Log("parent : " + holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.GetColor("_BaseColor"));
-        if (finalHoleIndex == myHoleIndex)
-        {
-            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
-            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
-        }
-        else
-        {
-            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
-            holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
-            if (myHoleIndex > -1)
-            {
-                holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.red);
-                holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.red);
-            }
+        //if (finalHoleIndex == myHoleIndex)
+        //{
+        //    //holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
+        //    //holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
+        //}
+        //else
+        //{
+        //    holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.green);
+        //    holePositions[finalHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.green);
+        //    if (myHoleIndex > -1)
+        //    {
+        //        holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.red);
+        //        holePositions[myHoleIndex].parent.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.red);
+        //    }
           
-        }
+        //}
     }
 
     private void EnterIdleState()
